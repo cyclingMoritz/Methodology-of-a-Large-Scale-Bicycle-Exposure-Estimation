@@ -229,25 +229,6 @@ write.csv(data3,'D:/Bike Exposure/Modeling/Model_clean_data_july10.csv')
 ```
 
 
-
-
-
-
-```{r}
-colnames(data)
-```
-
-
-
-
-
-
-```{r}
-unique(data$fclass)
-```
-
-
-
 ```{r}
 # save this updated data
 #write.csv(u_data1,'D:/Bike Exposure/Modeling/Model_final_data.csv')
@@ -304,81 +285,6 @@ quantile(as.integer(data3$ATT), p=seq(0, 1, 1/3))
 nrow(data3)
 ```
 
-
-```{r}
-colnames(data)
-```
-
-
-
-
-
-```{r}
-
-#datac=subset(data,data$ATT.in.Thousands<1000)
-#row.names(datac) <- NULL
-```
-
-```{r}
-par(mfrow=c(2,3))
-plot(data1$pctbiketowork_t, data1$AADB)
-plot(data1$pctbiketowork_q, data1$AADB)
-plot(data1$pctbiketowork_h, data1$AADB)
-plot(data1$totbiketoworkpersqmi_t, data1$AADB)
-plot(data1$totbiketoworkpersqmi_q, data1$AADB)
-plot(data1$totbiketoworkpersqmi_h, data1$AADB)
-```
-
-```{r}
-par(mfrow=c(2,3))
-plot(data$pctnoveh_t, data$AADB)
-plot(data$pctnoveh_q, data$AADB)
-plot(data$pctnoveh_h, data$AADB)
-plot(data$hshlddensitysqmi_t, data$AADB)
-plot(data$hshlddensitysqmi_q, data$AADB)
-plot(data$hshlddensitysqmi_h, data$AADB)
-```
-
-```{r}
-par(mfrow=c(1,3))
-plot(data$totwhitepersqmi_t, data$AADB)
-plot(data$totwhitepersqmi_q, data$AADB)
-plot(data$totwhitepersqmi_h, data$AADB)
-#plot(datac$popdensitysqmi_t, datac$ATT)
-#plot(datac$popdensitysqmi_q, datac$ATT)
-#plot(datac$popdensitysqmi_h, datac$ATT)
-```
-```{r}
-par(mfrow=c(2,3))
-plot(data$totwhitepersqmi_t, data$AADB)
-plot(data$totwhitepersqmi_q, data$AADB)
-plot(data$totwhitepersqmi_h, data$AADB)
-plot(data$popdensitysqmi_t, data$AADB)
-plot(data$popdensitysqmi_q, data$AADB)
-plot(data$popdensitysqmi_h, data$AADB)
-```
-
-```{r}
-par(mfrow=c(1,3))
-plot(data$speed, data$AADB)
-plot(data$slope, data$AADB)
-plot(data$reverse_average_speed, data$AADB)
-#plot(datac$forward_average_speed_2018_h, datac$ATT)
-#plot(datac$forward_average_speed_2018_h, datac$ATT)
-#plot(datac$reverse_average_speed_2019_h, datac$ATT)
-```
-```{r}
-colnames(data)
-```
-
-```{r}
-which(is.na(data$AADB))
-```
-```{r}
-nrow(data)
-```
-
-
 # Static+ Emerging Model
 ```{r}
 # run combined  Static model (only)2016-2019)
@@ -400,6 +306,8 @@ summarize_model(m1, data, k, r)
 plot_regions(m1, data, title="CA Bicycle Exposure Static+Emerging Model", scales="fixed")  # scales="free" or 'fixed' is an option
 plot_all(m1, data, title="CA Bicycle Exposure Static+Emerging Model", label_outliers=NA)  # label outliers in top X%, NA turns off labeling
 ```
+
+
 ```{r}
 nrow(data)
 ```
@@ -408,6 +316,8 @@ nrow(data)
 ```{r}
 m1$pred
 ```
+
+
 ```{r}
 min(m1$pred[2])
 ```
@@ -418,13 +328,16 @@ min(m1$pred[2])
 data5=merge(data3,m1$pred, by='rowIndex')
 head(data5,5)
 ```
+
 ```{r}
 mpred=aggregate(pred~tdg_id+year+Leg+county+Lat+Long+geometry+obs+rowIndex,data=data5, FUN=mean)
 head(mpred,5)
 ```
+
 ```{r}
 write.csv(mpred, 'D:/Bike Exposure/Modeling/Poisson_Regression_model_outcomes_july11.csv')
 ```
+
 
 ```{r}
 per=subset(data, type=='eco_permanent')
@@ -435,7 +348,6 @@ length(unique(short$Lat))
 length(unique(short$Long))
 
 ```
-
 
 
 
@@ -451,65 +363,6 @@ ggtitle(title)
 ```
 
 
-
-# run the model for specific facilities
-```{r}
-high_vol_fc=subset(data, fc_draft<5)
-low_vol_fc=subset(data, fc_draft>4)
-```
-
-```{r}
-hist(high_vol_fc$ATT)
-hist(low_vol_fc$ATT)
-```
-```{r}
-quantile(as.integer(high_vol_fc$AADB), p=seq(0, 1, 1/3))
-quantile(as.integer(low_vol_fc$AADB), p=seq(0, 1, 1/3))
-```
-
-
-
-# Now run the model for each facilities separately
-```{r}
-# run combined  Static model (only)2016-2019)
-set.seed(seed)
-m2 <- train(ATT ~Stv_commute_adb+Stv_leisure_adb+pctbiketowork_q
-+pctnoveh_h+popdensitysqmi_h+hshlddensitysqmi_h
-+log(slope+0.01)
-+near_univ_miles+path+residential
-+speed_0_25+speed_21_35+speed_greater_than_35
-,
-            
-    #Stv_commute+Stv_leisure+pctbiketowork_q+totatleastbachelorspersqmi_h+log(totnovehpersqmi_h+0.01)+sqrt(hshldden#sitysqmi_t)+tertiary+speed_0_25
-                data =high_vol_fc, method = "glm",family='poisson',
-                trControl = train_control5, na.action=na.exclude)
-#family=sm.families.NegativeBinomial(link=sm.families.links.identity)
-#family='poisson
-# for nargative Binomial: family="nbinom2"
-summarize_model(m2, high_vol_fc, k, r)
-plot_regions(m2, high_vol_fc, title="CA Bicycle Exposure Static+Emerging Model", scales="fixed")  # scales="free" or 'fixed' is an option
-plot_all(m2, high_vol_fc, title="CA Bicycle Exposure Static+Emerging Model", label_outliers=NA)  # label outliers in top X%, NA turns off labeling
-```
-```{r}
-# run combined  Static model (only)2016-2019)
-set.seed(seed)
-m3 <- train(ATT ~Stv_commute_adb+Stv_leisure_adb+pctbiketowork_q
-+pctnoveh_h+popdensitysqmi_h+hshlddensitysqmi_h
-+log(slope+0.01)
-+near_univ_miles+path+residential
-+speed_0_25+speed_21_35+speed_greater_than_35
-,
-            
-    #Stv_commute+Stv_leisure+pctbiketowork_q+totatleastbachelorspersqmi_h+log(totnovehpersqmi_h+0.01)+sqrt(hshldden#sitysqmi_t)+tertiary+speed_0_25
-                data =low_vol_fc, method = "glm",family='poisson',
-                trControl = train_control5, na.action=na.exclude)
-#family=sm.families.NegativeBinomial(link=sm.families.links.identity)
-#family='poisson
-# for nargative Binomial: family="nbinom2"
-summarize_model(m3, low_vol_fc, k, r)
-plot_regions(m3, low_vol_fc, title="CA Bicycle Exposure Static+Emerging Model", scales="fixed")  # scales="free" or 'fixed' is an option
-plot_all(m3, low_vol_fc, title="CA Bicycle Exposure Static+Emerging Model", label_outliers=NA)  # label outliers in top X%, NA turns off labeling
-```
 # Prepare SHS system data for model application
 ```{r}
 shs=read.csv('D:/Bike Exposure/Modeling/smart4_final_output_Jun29_2023.csv')
